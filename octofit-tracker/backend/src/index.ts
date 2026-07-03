@@ -1,15 +1,63 @@
 import express from 'express';
 import './config/database';
+import User from './models/user';
+import Team from './models/team';
+import Activity from './models/activity';
+import LeaderboardEntry from './models/leaderboard';
+import Workout from './models/workout';
+import { seedDatabaseData } from './scripts/seed';
 
 const app = express();
-const port = process.env.PORT || 8000;
+const port = Number(process.env.PORT || 8000);
+const apiBaseUrl = process.env.CODESPACE_NAME
+  ? `https://${process.env.CODESPACE_NAME}-8000.app.github.dev`
+  : `http://localhost:${port}`;
 
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'octofit-backend' });
+  res.json({
+    status: 'ok',
+    service: 'octofit-backend',
+    apiBaseUrl,
+  });
 });
 
-app.listen(port, () => {
-  console.log(`OctoFit backend listening on port ${port}`);
+app.get(['/api/users', '/api/users/'], async (_req, res) => {
+  const users = await User.find({}).lean();
+  res.json(users);
 });
+
+app.get(['/api/teams', '/api/teams/'], async (_req, res) => {
+  const teams = await Team.find({}).populate('members').lean();
+  res.json(teams);
+});
+
+app.get(['/api/activities', '/api/activities/'], async (_req, res) => {
+  const activities = await Activity.find({}).lean();
+  res.json(activities);
+});
+
+app.get(['/api/leaderboard', '/api/leaderboard/'], async (_req, res) => {
+  const leaderboard = await LeaderboardEntry.find({}).populate('user').lean();
+  res.json(leaderboard);
+});
+
+app.get(['/api/workouts', '/api/workouts/'], async (_req, res) => {
+  const workouts = await Workout.find({}).lean();
+  res.json(workouts);
+});
+
+seedDatabaseData()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`OctoFit backend listening on port ${port}`);
+      console.log(`API base URL: ${apiBaseUrl}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Error seeding database on startup:', error);
+    process.exit(1);
+  });
+
+export { app, apiBaseUrl };
