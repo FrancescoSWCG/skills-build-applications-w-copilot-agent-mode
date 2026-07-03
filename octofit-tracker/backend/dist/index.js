@@ -15,8 +15,10 @@ const seed_1 = require("./scripts/seed");
 const app = (0, express_1.default)();
 exports.app = app;
 const port = Number(process.env.PORT || 8000);
-const apiBaseUrl = process.env.CODESPACE_NAME
-    ? `https://${process.env.CODESPACE_NAME}-8000.app.github.dev`
+const host = process.env.HOST || '0.0.0.0';
+const codespaceName = process.env.CODESPACE_NAME?.trim();
+const apiBaseUrl = codespaceName
+    ? `https://${codespaceName}-8000.app.github.dev`
     : `http://localhost:${port}`;
 exports.apiBaseUrl = apiBaseUrl;
 app.use(express_1.default.json());
@@ -49,8 +51,8 @@ app.get(['/api/workouts', '/api/workouts/'], async (_req, res) => {
 });
 (0, seed_1.seedDatabaseData)()
     .then(() => {
-    app.listen(port, () => {
-        console.log(`OctoFit backend listening on port ${port}`);
+    app.listen(port, host, () => {
+        console.log(`OctoFit backend listening on ${host}:${port}`);
         console.log(`API base URL: ${apiBaseUrl}`);
     });
 })
