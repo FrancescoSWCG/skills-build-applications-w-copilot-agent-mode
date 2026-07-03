@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchApiData, API_BASE_URL, isCodespaceFallback } from '../api.js'
+// Endpoint: https://${import.meta.env.VITE_CODESPACE_NAME}-8000.app.github.dev/api/teams
 
 function Teams() {
   const [teams, setTeams] = useState([])

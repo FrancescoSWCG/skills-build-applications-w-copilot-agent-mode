@@ -7,7 +7,8 @@ export const API_BASE_URL = `${apiBaseHost}/api`;
 export const isCodespaceFallback = !rawCodespaceName;
 
 export function apiUrl(resource) {
-  return `${API_BASE_URL}/${resource}`;
+  const normalizedResource = resource.replace(/^\/+|\/+$/g, '')
+  return `${API_BASE_URL}/${normalizedResource}/`
 }
 
 export async function fetchApiData(resource) {
@@ -28,6 +29,10 @@ export async function fetchApiData(resource) {
 
   if (payload?.results && Array.isArray(payload.results)) {
     return payload.results;
+  }
+
+  if (payload?.items && Array.isArray(payload.items)) {
+    return payload.items;
   }
 
   const firstArray = Object.values(payload).find((value) => Array.isArray(value));
